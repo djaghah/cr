@@ -1,0 +1,22 @@
+const costsPerLevel = [
+    { level: 1, shards: 0, crt: 0, xp: 0 },
+    { level: 2, shards: 11000, crt: 2, xp: 2 },
+    { level: 3, shards: 26000, crt: 10, xp: 12 },
+    { level: 4, shards: 42000, crt: 39, xp: 32 },
+    { level: 5, shards: 61000, crt: 96, xp: 62 },
+    { level: 6, shards: 83000, crt: 271, xp: 112 },
+    { level: 7, shards: 108000, crt: 621, xp: 192 },
+    { level: 8, shards: 138000, crt: 1261, xp: 322 },
+    { level: 9, shards: 173000, crt: 2231, xp: 532 },
+    { level: 10, shards: 214000, crt: 3611, xp: 872 },
+    { level: 11, shards: 262000, crt: 5331, xp: 1422 },
+    { level: 12, shards: 317000, crt: 7431, xp: 2102 },
+    { level: 13, shards: 379000, crt: 9831, xp: 2992 },
+    { level: 14, shards: 448000, crt: 12481, xp: 4222 },
+    { level: 15, shards: 523000, crt: 15381, xp: 6002 },
+    { level: 16, shards: 603000, crt: 18581, xp: 8462 },
+    { level: 17, shards: 688000, crt: 22081, xp: 11812 },
+    { level: 18, shards: 776000, crt: 25881, xp: 16392 },
+    { level: 19, shards: 867000, crt: 30081, xp: 22752 },
+    { level: 20, shards: 961000, crt: 34681, xp: 31572 }
+];
