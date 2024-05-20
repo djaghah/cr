@@ -5,72 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MultiversX Utilities</title>
     <link rel="stylesheet" href="styles/style.css">
-    <style>
-        .search-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .search-container label, .search-container input[type="text"] {
-            margin-right: 10px;
-        }
-        .search-container button {
-            margin-left: 10px;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .left {
-            flex: 1;
-            margin-right: 20px;
-        }
-        .right {
-            flex: 1;
-        }
-        .frame {
-            border: 2px solid #ccc;
-            width: 150px;
-            height: 150px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .frame img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-left: 0; /* Remove default margin */
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            color: #333; /* Dark text color for table cells */
-        }
-        th {
-            background-color: #f2f2f2;
-            color: #333; /* Dark text color for table header */
-        }
-        footer {
-            background-color: #343a40; /* Dark gray background for footer */
-            color: #fff; /* White text color for footer */
-            padding: 20px;
-            text-align: center;
-        }
-        footer strong {
-            color: #ff9800; /* Orange color for the Multiversx address */
-        }
-        .talents-header th {
-            background-color: #f2f2f2; /* Match table header background color */
-            color: #333; /* Match table header text color */
-            font-weight: bold; /* Make the font bold */
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -90,7 +24,7 @@
             </div>
             <div class="right">
                 <label for="nft_number">NFT #:</label>
-                <input type="text" id="nft_number" readonly style="text-align: right;"> <!-- Add readonly attribute and text align right -->
+                <input type="text" id="nft_number" readonly style="text-align: right;">
                 <table id="nft_details_table">
                     <tr>
                         <th>Attribute</th>
@@ -102,6 +36,7 @@
                         <th>XP Cost</th>
                         <th>Shards Cost</th>
                         <th>CRT Cost</th>
+                        <th>Level 20 Cost</th>
                         <th>Total CRT Cost</th>
                     </tr>
                 </table>
@@ -111,132 +46,175 @@
                         <th>Value</th>
                     </tr>
                 </table>
+                <div id="egld_cost_container"></div>
             </div>
         </div>
     </main>
-    <footer>
-        <p>If you like our project, consider donating for further development:</p>
-        <p><strong>Multiversx address:</strong> erd1lse0wg9mr7pvxgjh7enfu6gycz8w4hm7uy4hwx4ukt97sc6yl55slxlylf</p>
-    </footer>
+    <script src="scripts/costsPerLevel.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const costsPerLevel = [
-                { level: 1, shards: 0, crt: 0, xp: 0 },
-                { level: 2, shards: 11000, crt: 2, xp: 2 },
-                { level: 3, shards: 26000, crt: 10, xp: 12 },
-                { level: 4, shards: 42000, crt: 39, xp: 32 },
-                { level: 5, shards: 61000, crt: 96, xp: 62 },
-                { level: 6, shards: 83000, crt: 271, xp: 112 },
-                { level: 7, shards: 108000, crt: 621, xp: 192 },
-                { level: 8, shards: 138000, crt: 1261, xp: 322 },
-                { level: 9, shards: 173000, crt: 2231, xp: 532 },
-                { level: 10, shards: 214000, crt: 3611, xp: 872 },
-                { level: 11, shards: 262000, crt: 5331, xp: 1422 },
-                { level: 12, shards: 317000, crt: 7431, xp: 2102 },
-                { level: 13, shards: 379000, crt: 9831, xp: 2992 },
-                { level: 14, shards: 448000, crt: 12481, xp: 4222 },
-                { level: 15, shards: 523000, crt: 15381, xp: 6002 },
-                { level: 16, shards: 603000, crt: 18581, xp: 8462 },
-                { level: 17, shards: 688000, crt: 22081, xp: 11812 },
-                { level: 18, shards: 776000, crt: 25881, xp: 16392 },
-                { level: 19, shards: 867000, crt: 30081, xp: 22752 },
-                { level: 20, shards: 961000, crt: 34681, xp: 31572 }
-            ];
-
+        
             const headerText = localStorage.getItem("headerText");
             if (headerText) {
                 document.getElementById("header-text").textContent = headerText;
             }
 
             const searchButton = document.getElementById("searchButton");
+            const egldCostContainer = document.getElementById("egld_cost_container");
             searchButton.addEventListener("click", function() {
-                const identifier = 'GSPACEAPE-08bc2b-' + document.getElementById("identifier").value;
+    const identifier = 'GSPACEAPE-08bc2b-' + document.getElementById("identifier").value;
 
-                if (!identifier) {
-                    alert("Please enter an identifier.");
-                    return;
-                }
+    if (!identifier) {
+        alert("Please enter an identifier.");
+        return;
+    }
 
-                fetch(`https://api.elrond.com/collections/${document.location.pathname.split("/").pop().replace(".html", "")}/nfts?identifiers=${identifier}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const nftData = data[0];
-                        const thumbnailUrl = nftData.media[0].thumbnailUrl;
+    const mainTable = document.getElementById("nft_details_table");
+    mainTable.innerHTML = "<tr><th>Attribute</th><th>Value</th></tr>";
 
-                        const nftImage = document.getElementById("nft_image");
-                        nftImage.src = thumbnailUrl;
+    const talentsTable = document.getElementById("talents_table");
+    talentsTable.innerHTML = "<tr><th>Talent</th><th>Value</th></tr>";
 
-                        const nftNumberInput = document.getElementById("nft_number");
-                        nftNumberInput.value = nftData.metadata.id;
+    const costsTable = document.getElementById("costs_table");
+    costsTable.innerHTML = "<tr><th>XP Cost</th><th>Shards Cost</th><th>CRT Cost</th><th>Level 20 Cost</th><th>Total CRT Cost</th></tr>";
 
-                        const dynamicDataURL = nftData.metadata.stats;
+    fetch(`https://api.elrond.com/collections/${document.location.pathname.split("/").pop().replace(".html", "")}/nfts?identifiers=${identifier}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                alert("No data found for the given identifier.");
+                return;
+            }
 
-                        fetch(dynamicDataURL)
-                            .then(response => response.json())
-                            .then(dynamicData => {
-                                const mainTable = document.getElementById("nft_details_table");
-                                const talentsTable = document.getElementById("talents_table");
-                                const costsTable = document.getElementById("costs_table");
+            const nftData = data[0];
+            const thumbnailUrl = nftData.media[0].thumbnailUrl;
 
-                                // Clear only talents and costs table, not main table headers
-                                talentsTable.innerHTML = "<tr><th>Talent</th><th>Value</th></tr>";
-                                costsTable.innerHTML = "<tr><th>XP Cost</th><th>Shards Cost</th><th>CRT Cost</th><th>Total CRT Cost</th></tr>";
+            const nftImage = document.getElementById("nft_image");
+            nftImage.src = thumbnailUrl;
 
-                                const children = dynamicData.gameData[0].dynamicData;
-                                let currentLevel = 1;
-                                let characterTokens = 0;
+            const nftNumberInput = document.getElementById("nft_number");
+            nftNumberInput.value = nftData.metadata.id;
 
-                                for (const key in children) {
-                                    const value = children[key];
-                                    if (key === "talents") {
-                                        value.forEach(talent => {
-                                            if (talent.value !== 0) {
-                                                const talentRow = talentsTable.insertRow(-1);
-                                                const talentCell1 = talentRow.insertCell(0);
-                                                const talentCell2 = talentRow.insertCell(1);
-                                                talentCell1.textContent = talent.name;
-                                                talentCell2.textContent = talent.value;
+            const dynamicDataURL = nftData.metadata.stats;
+
+            fetch(dynamicDataURL)
+                .then(response => response.json())
+                .then(dynamicData => {
+                    let currentLevel = dynamicData.level || 0;
+                    let characterTokens = dynamicData.character_tokens || 0;
+                    const children = dynamicData.gameData[0].dynamicData;
+                    for (const key in children) {
+                        const value = children[key];
+                        if (key === "talents") {
+                            value.forEach(talent => {
+                                if (talent.value !== 0) {
+                                    const talentRow = talentsTable.insertRow(-1);
+                                    talentRow.insertCell(0).textContent = talent.name;
+                                    talentRow.insertCell(1).textContent = talent.value;
+                                }
+                            });
+                        } else {
+                            const row = mainTable.insertRow(-1);
+                            row.insertCell(0).textContent = key;
+                            row.insertCell(1).textContent = value;
+
+                            if (key === "level") {
+                                currentLevel = value;
+                            } else if (key === "character_tokens") {
+                                characterTokens = value;
+                            }
+                        }
+                    }
+                    console.log(`Current Level: ${currentLevel}`);
+                    const levelCosts = costsPerLevel[currentLevel - 1];
+                    if (levelCosts) {
+                        const maxCostCRT = costsPerLevel[19].crt;
+                        let totalCRTCost = levelCosts.crt + (levelCosts.xp * 14000 / 3500) + (levelCosts.shards * (22500 * 9800 / 45000) / 500000);
+
+                        if (totalCRTCost > maxCostCRT) {
+                            totalCRTCost = maxCostCRT;
+                        }
+
+                        const level20Cost = maxCostCRT - totalCRTCost;
+
+                        const row = costsTable.insertRow(-1);
+                        row.insertCell(0).textContent = levelCosts.xp;
+                        row.insertCell(1).textContent = levelCosts.shards;
+                        row.insertCell(2).textContent = levelCosts.crt;
+                        row.insertCell(3).textContent = level20Cost.toFixed(2);
+                        row.insertCell(4).textContent = totalCRTCost.toFixed(2);
+
+                        if (!document.getElementById("egldCostButton")) {
+                            const egldCostButton = document.createElement("button");
+                            egldCostButton.id = "egldCostButton";
+                            egldCostButton.textContent = "Calculate EGLD Costs";
+                            egldCostButton.style.marginTop = "10px";
+                            egldCostButton.style.marginBottom = "10px";
+                            egldCostButton.classList.add("styled-button");
+                            egldCostButton.addEventListener("click", function() {
+                                fetch("https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqf57y8m9krsvrceqxujngzm77p82zqc502jpsnnezqs/tokens?identifiers=CRT-52decf,WEGLD-bd4d79")
+                                    .then(response => response.json())
+                                    .then(tokenData => {
+                                        let crtBalance, wegldBalance;
+
+                                        for (const token of tokenData) {
+                                            if (token.identifier === "CRT-52decf") {
+                                                crtBalance = BigInt(token.balance);
+                                            } else if (token.identifier === "WEGLD-bd4d79") {
+                                                wegldBalance = BigInt(token.balance);
                                             }
-                                        });
-                                    } else {
-                                        const row = mainTable.insertRow(-1);
-                                        const cell1 = row.insertCell(0);
-                                        const cell2 = row.insertCell(1);
-                                        cell1.textContent = key;
-                                        cell2.textContent = value;
-
-                                        if (key === "level") {
-                                            currentLevel = value;
-                                        } else if (key === "character_tokens") {
-                                            characterTokens = value;
                                         }
-                                    }
-                                }
 
-                                const levelCosts = costsPerLevel[currentLevel - 1];
-                                if (levelCosts) {
-                                    const totalXP = levelCosts.xp + characterTokens;
-                                    const totalShards = levelCosts.shards;
-                                    const totalCrt = levelCosts.crt;
-                                    const totalCrtCost = totalCrt + (totalXP * 14000 / 3500) + (totalShards * (22500 * 9800 / 45000) / 500000);
+                                        const currentEgldCost = totalCRTCost * (Number(wegldBalance) /
+                                        Number(crtBalance));
+                                        const level20EgldCost = level20Cost * (Number(wegldBalance) / Number(crtBalance));
 
-                                    const row = costsTable.insertRow(-1);
-                                    const cell1 = row.insertCell(0);
-                                    const cell2 = row.insertCell(1);
-                                    const cell3 = row.insertCell(2);
-                                    const cell4 = row.insertCell(3);
+                                        let egldCostTable = document.getElementById("egldCostTable");
+                                        if (!egldCostTable) {
+                                            egldCostTable = document.createElement("table");
+                                            egldCostTable.id = "egldCostTable";
+                                            egldCostTable.innerHTML = `
+                                                <tr>
+                                                    <th>Current EGLD Cost</th>
+                                                    <th>Level 20 EGLD Cost</th>
+                                                </tr>
+                                            `;
+                                            egldCostContainer.appendChild(egldCostTable);
+                                        }
 
-                                    cell1.textContent = totalXP;
-                                    cell2.textContent = totalShards;
-                                    cell3.textContent = totalCrt;
-                                    cell4.textContent = totalCrtCost.toFixed(2);
-                                }
-                            })
-                            .catch(error => console.error("Error fetching dynamic data:", error));
-                    })
-                    .catch(error => console.error("Error fetching NFT data:", error));
-            });
+                                        const egldCostTableBody = egldCostTable.querySelector("tbody");
+                                        if (egldCostTableBody) {
+                                            egldCostTableBody.innerHTML = `
+                                                <tr>
+                                                    <td>${currentEgldCost.toFixed(2)}</td>
+                                                    <td>${level20EgldCost.toFixed(2)}</td>
+                                                </tr>
+                                            `;
+                                        } else {
+                                            const egldCostTableRow = document.createElement("tr");
+                                            egldCostTableRow.innerHTML = `
+                                                <td>${currentEgldCost.toFixed(2)}</td>
+                                                <td>${level20EgldCost.toFixed(2)}</td>
+                                            `;
+                                            egldCostTable.appendChild(egldCostTableRow);
+                                        }
+                                    })
+                                    .catch(error => console.error("Error fetching token data:", error));
+                            });
+                            egldCostContainer.appendChild(egldCostButton);
+                        }
+                    }
+                })
+                .catch(error => console.error("Error fetching dynamic data:", error));
+        })
+        .catch(error => console.error("Error fetching NFT data:", error));
+});
+
+           
+
         });
     </script>
+    <div id="footer-placeholder"></div>
+    <script src="scripts/footer.js"></script>
 </body>
 </html>
