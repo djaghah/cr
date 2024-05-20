@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiversX Utilities</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .large-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .large-button img {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Multiversx NFT Utilities</h1>
+    </header>
+    <main>
+        <div class="button-container">
+            <button id="GSPACEAPE-08bc2b" class="large-button">
+                <img src="images/GSPACEAPE-08bc2b.png" alt="Cantina Royale">
+                <span>Cantina Genesis Space Apes</span>
+            </button>
+
+            <button id="CEA-2d29f9" class="large-button">
+                <img src="images/CEA-2d29f9.png" alt="Cantina Royale">
+                <span>Cantina Genesis EAPES</span>
+            </button>
+
+            <button id="CRHEROES-9edff2" class="large-button">
+                <img src="images/CRHEROES-9edff2.jpg" alt="Cantina Royale">
+                <span>Cantina Royale Heroes (Sharks)</span>
+            </button>
+            
+        </div>
+    </main>
+    <footer>
+        <p>If you like our project, consider donating for further development:</p>
+        <p><strong>Multiversx address:</strong> erd1lse0wg9mr7pvxgjh7enfu6gycz8w4hm7uy4hwx4ukt97sc6yl55slxlylf</p>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const buttons = document.querySelectorAll(".large-button");
+
+            buttons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const spanValue = this.querySelector("span").textContent;
+                    const pageId = this.id;
+
+                    // Store the span value in localStorage
+                    localStorage.setItem("headerText", spanValue);
+
+                    // Redirect to the corresponding HTML page
+                    window.location.href = `${pageId}.html`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

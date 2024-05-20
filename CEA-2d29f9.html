@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiversX Utilities</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .search-container label, .search-container input[type="text"] {
+            margin-right: 10px;
+        }
+        .search-container button {
+            margin-left: 10px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .left {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .right {
+            flex: 1;
+        }
+        .frame {
+            border: 2px solid #ccc;
+            width: 150px;
+            height: 150px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .frame img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-left: 0; /* Remove default margin */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            color: #333; /* Dark text color for table cells */
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333; /* Dark text color for table header */
+        }
+        footer {
+            background-color: #343a40; /* Dark gray background for footer */
+            color: #fff; /* White text color for footer */
+            padding: 20px;
+            text-align: center;
+        }
+        footer strong {
+            color: #ff9800; /* Orange color for the Multiversx address */
+        }
+        .talents-header th {
+            background-color: #f2f2f2; /* Match table header background color */
+            color: #333; /* Match table header text color */
+            font-weight: bold; /* Make the font bold */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 id="header-text">Cantina Genesis Space Apes</h1>
+    </header>
+    <main>
+        <div class="search-container">
+            <label for="identifier">Identifier:</label>
+            <input type="text" id="identifier">
+            <button id="searchButton">Search</button>
+        </div>
+        <div class="container">
+            <div class="left">
+                <div class="frame">
+                    <img id="nft_image" src="" alt="NFT Image">
+                </div>
+            </div>
+            <div class="right">
+                <label for="nft_number">NFT #:</label>
+                <input type="text" id="nft_number" readonly style="text-align: right;"> <!-- Add readonly attribute and text align right -->
+                <table id="nft_details_table">
+                    <!-- Table rows will be dynamically generated here -->
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                    </tr>
+                </table>
+                <table id="talents_table">
+                    <!-- Table rows for Talents will be dynamically generated here -->
+                    <tr>
+                        <th>Talent</th>
+                        <th>Value</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>If you like our project, consider donating for further development:</p>
+        <p><strong>Multiversx address:</strong> erd1lse0wg9mr7pvxgjh7enfu6gycz8w4hm7uy4hwx4ukt97sc6yl55slxlylf</p>
+    </footer>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Retrieve the header text from localStorage
+            const headerText = localStorage.getItem("headerText");
+            if (headerText) {
+                document.getElementById("header-text").textContent = headerText;
+            }
+
+            const searchButton = document.getElementById("searchButton");
+            searchButton.addEventListener("click", function() {
+                const identifier = document.getElementById("identifier").value;
+
+                // Check if identifier is not empty or null
+                if (!identifier) {
+                    alert("Please enter an identifier.");
+                    return;
+                }
+
+                // Fetch NFT data
+                fetch(`https://api.elrond.com/collections/${document.location.pathname.split("/").pop().replace(".html", "")}/nfts?identifiers=${identifier}`)
+                .then(response => response.json())
+                .then(data => {
+                    const nftData = data[0];
+                    const thumbnailUrl = nftData.media[0].thumbnailUrl;
+
+                    // Set NFT image source
+                    const nftImage = document.getElementById("nft_image");
+                    nftImage.src = thumbnailUrl;
+
+                    // Set the value of the nft_number input field to the metadata ID
+                    const nftNumberInput = document.getElementById("nft_number");
+                    nftNumberInput.value = nftData.metadata.id;
+
+                    // Fetch dynamic data URL
+                    const dynamicDataURL = nftData.metadata.stats;
+
+                    // Fetch dynamic data
+                    fetch(dynamicDataURL)
+                    .then(response => response.json())
+                    .then(dynamicData => {
+                        const mainTable = document.getElementById("nft_details_table");
+                        const talentsTable = document.getElementById("talents_table");
+
+                        // Clear previous table content
+                        mainTable.innerHTML = "<tr><th>Attribute</th><th>Value</th></tr>";
+                        talentsTable.innerHTML = "<tr><th>Talent</th><th>Value</th></tr>";
+
+                        // Populate tables with dynamic data
+                        const children = dynamicData.gameData[0].dynamicData;
+                        for (const key in children) {
+                            const value = children[key];
+                            if (key === "talents") {
+                                value.forEach(talent => {
+                                    if (talent.value !== 0) {
+                                        const row = talentsTable.insertRow(-1);
+                                        const cell1 = row.insertCell(0);
+                                        const cell2 = row.insertCell(1);
+                                        cell1.textContent = talent.name;
+                                        cell2.textContent = talent.value;
+                                    }
+                                });
+                            } else {
+                                const row = mainTable.insertRow(-1);
+                                const cell1 = row.insertCell(0);
+                                const cell2 = row.insertCell(1);
+                                cell1.textContent = key;
+                                cell2.textContent = value;
+                            }
+                        }
+                    })
+                    .catch(error => console.error("Error fetching dynamic data:", error));
+                })
+                .catch(error => console.error("Error fetching NFT data:", error));
+            });
+        });
+    </script>
+</body>
+</html>
