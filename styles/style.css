@@ -105,3 +105,45 @@ th {
     color: #333; /* Match table header text color */
     font-weight: bold; /* Make the */
 }
+
+footer {
+    background-color: #282c34; /* Darker background */
+    color: #bbb; /* Lighter text color */
+    padding: 20px;
+    text-align: center;
+}
+
+footer p {
+    margin: 10px 0;
+}
+
+footer p strong {
+    color: #ffcc00; /* Highlighted color for Multiversx address */
+    font-size: 1.1em; /* Slightly larger font for emphasis */
+}
+
+footer p a {
+    color: #ffcc00; /* Highlighted color for links */
+    text-decoration: none;
+}
+
+footer p a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; /* Adds space between the buttons */
+}
+.large-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.large-button img {
+    max-width: 200px;
+    height: auto;
+}
