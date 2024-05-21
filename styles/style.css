@@ -1,4 +1,4 @@
-/* styles.css */
+/* styles/style.css */
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa; /* Light gray background */
@@ -21,6 +21,12 @@ footer {
     color: #fff; /* White text color for footer */
     padding: 20px;
     text-align: center;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .search-container label,
@@ -92,4 +98,10 @@ th {
 
 #nft_number {
     text-align: right;
+}
+
+.talents-header th {
+    background-color: #f2f2f2; /* Match table header background color */
+    color: #333; /* Match table header text color */
+    font-weight: bold; /* Make the */
 }
