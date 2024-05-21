@@ -8,8 +8,9 @@
     <style>
         .button-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; /* Adds space between the buttons */
         }
         .large-button {
             display: flex;
@@ -43,13 +44,10 @@
                 <img src="images/CRHEROES-9edff2.jpg" alt="Cantina Royale">
                 <span>Cantina Royale Heroes (Sharks)</span>
             </button>
-            
         </div>
     </main>
-    <footer>
-        <p>If you like our project, consider donating for further development:</p>
-        <p><strong>Multiversx address:</strong> erd1lse0wg9mr7pvxgjh7enfu6gycz8w4hm7uy4hwx4ukt97sc6yl55slxlylf</p>
-    </footer>
+    <div id="footer-placeholder"></div>
+    <script src="scripts/footer.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const buttons = document.querySelectorAll(".large-button");
