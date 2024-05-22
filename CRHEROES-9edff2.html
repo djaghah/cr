@@ -218,7 +218,7 @@
                                 console.log(`Current Level: ${currentLevel}`);
                                 const levelCosts = costsPerLevel[currentLevel - 1];
                                 if (levelCosts) {
-                                    const maxCostCRT = costsPerLevel[19].crt;
+                                    const maxCostCRT = costsPerLevel[19].crt + (costsPerLevel[19].xp * 14000 / 3500) + (costsPerLevel[19].shards * (22500 * 9800 / 45000) / 500000);
                                     let totalCRTCost = levelCosts.crt + (levelCosts.xp * 14000 / 3500) + (levelCosts.shards * (22500 * 9800 / 45000) / 500000);
 
                                     if (totalCRTCost > maxCostCRT) {
