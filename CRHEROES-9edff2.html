@@ -6,69 +6,41 @@
     <title>MultiversX Utilities</title>
     <link rel="stylesheet" href="styles/style.css">
     <style>
-        .search-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+        /* Add this style to right-align the table columns */
+        #nft_details_table td:nth-child(2),
+        #costs_table td,
+        #egldCostTable td {
+            text-align: right;
         }
-        .search-container label, .search-container input[type="text"] {
-            margin-right: 10px;
-        }
-        .search-container button {
-            margin-left: 10px;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-        .left {
-            flex: 1;
-            margin-right: 20px;
-        }
-        .right {
-            flex: 1;
-        }
-        .frame {
-            border: 2px solid #ccc;
-            width: 150px;
-            height: 150px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .frame img {
-            max-width: 100%;
-            max-height: 100%;
-        }
+
+        /* Ensure tables have some basic styling for better readability */
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin-left: 0; /* Remove default margin */
+            border-collapse: collapse;
         }
+
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
-            text-align: left;
-            color: #333; /* Dark text color for table cells */
         }
+
         th {
             background-color: #f2f2f2;
-            color: #333; /* Dark text color for table header */
+            text-align: left;
         }
-        footer {
-            background-color: #343a40; /* Dark gray background for footer */
-            color: #fff; /* White text color for footer */
-            padding: 20px;
-            text-align: center;
+
+        .styled-button {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
-        footer strong {
-            color: #ff9800; /* Orange color for the Multiversx address */
-        }
-        .talents-header th {
-            background-color: #f2f2f2; /* Match table header background color */
-            color: #333; /* Match table header text color */
-            font-weight: bold; /* Make the font bold */
+
+        .styled-button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -77,120 +49,322 @@
         <h1 id="header-text">Cantina Genesis Space Apes</h1>
     </header>
     <main>
-        <div class="search-container">
-            <label for="identifier">Identifier:</label>
-            <input type="text" id="identifier">
-            <button id="searchButton">Search</button>
-        </div>
+        
         <div class="container">
             <div class="left">
+                <div class="search-container">
+                    <label for="identifier" id="identifier-label"></label>
+                    <input type="text" id="identifier">
+                    <button id="searchButton">Search</button>
+                    <div id="egld_button_container"></div> <!-- Container for egldCostButton -->
+                </div>
                 <div class="frame">
                     <img id="nft_image" src="" alt="NFT Image">
                 </div>
+                <div id="egld_cost_container"></div>
+                <div id="xoxno_button_container"></div> <!-- Container for xoxnoButton -->
+                <div id="xoxno_table_container"></div> <!-- Container for the XOXNO table -->
             </div>
             <div class="right">
                 <label for="nft_number">NFT #:</label>
-                <input type="text" id="nft_number" readonly style="text-align: right;"> <!-- Add readonly attribute and text align right -->
+                <input type="text" id="nft_number" readonly style="text-align: right;">
+                <label for="nft_rarity">Rarity:</label>
+                <input type="text" id="nft_rarity" readonly>
                 <table id="nft_details_table">
-                    <!-- Table rows will be dynamically generated here -->
                     <tr>
                         <th>Attribute</th>
                         <th>Value</th>
                     </tr>
                 </table>
+                <table id="costs_table">
+                    <tr>
+                        <th>XP Cost</th>
+                        <th>Shards Cost</th>
+                        <th>CRT Cost</th>
+                        <th>Level 20 Cost</th>
+                        <th>Total CRT Cost</th>
+                    </tr>
+                </table>
                 <table id="talents_table">
-                    <!-- Table rows for Talents will be dynamically generated here -->
                     <tr>
                         <th>Talent</th>
                         <th>Value</th>
                     </tr>
                 </table>
+                
             </div>
         </div>
     </main>
-    <footer>
-        <p>If you like our project, consider donating for further development:</p>
-        <p><strong>Multiversx address:</strong> erd1lse0wg9mr7pvxgjh7enfu6gycz8w4hm7uy4hwx4ukt97sc6yl55slxlylf</p>
-    </footer>
+    <script src="scripts/costsPerLevel.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Retrieve the header text from localStorage
+            // Extract the current HTML file name without the extension
+            const path = window.location.pathname;
+            const page = path.split("/").pop();
+            const pageName = page.replace(".html", "");
+        
+            // Set the label text dynamically
+            const identifierLabel = document.getElementById("identifier-label");
+            identifierLabel.textContent = pageName + "-";
+
             const headerText = localStorage.getItem("headerText");
             if (headerText) {
                 document.getElementById("header-text").textContent = headerText;
             }
 
             const searchButton = document.getElementById("searchButton");
-            searchButton.addEventListener("click", function() {
-                const identifier = document.getElementById("identifier").value;
+            const egldButtonContainer = document.getElementById("egld_button_container");
+            const egldCostContainer = document.getElementById("egld_cost_container");
+            const xoxnoButtonContainer = document.getElementById("xoxno_button_container");
+            const xoxnoTableContainer = document.getElementById("xoxno_table_container");
 
-                // Check if identifier is not empty or null
-                if (!identifier) {
+            searchButton.addEventListener("click", function() {
+                const identifier = pageName + '-' + document.getElementById("identifier").value;
+
+                if (!document.getElementById("identifier").value) {
                     alert("Please enter an identifier.");
                     return;
                 }
 
+                const mainTable = document.getElementById("nft_details_table");
+                mainTable.innerHTML = "<tr><th>Attribute</th><th>Value</th></tr>";
 
-                <!--   https://metadata.cantinaroyale.io/metadata/CRHEROES-9edff2/298   https://metadata.cantinaroyale.io/dynamic/CRHEROES-9edff2/298-->
+                const talentsTable = document.getElementById("talents_table");
+                talentsTable.innerHTML = "<tr><th>Talent</th><th>Value</th></tr>";
 
-console.log(''+`https://api.elrond.com/collections/${document.location.pathname.split("/").pop().replace(".html", "")}/nfts?identifiers=${identifier}`);
-                // Fetch NFT data
-                fetch(`https://api.elrond.com/collections/${document.location.pathname.split("/").pop().replace(".html", "")}/nfts?identifiers=${identifier}`)
-                .then(response => response.json())
-                .then(data => {
-                    const nftData = data[0];
-                    const thumbnailUrl = nftData.media[0].thumbnailUrl;
+                const costsTable = document.getElementById("costs_table");
+                costsTable.innerHTML = "<tr><th>XP Cost</th><th>Shards Cost</th><th>CRT Cost</th><th>Level 20 Cost</th><th>Total CRT Cost</th></tr>";
 
-                    // Set NFT image source
-                    const nftImage = document.getElementById("nft_image");
-                    nftImage.src = thumbnailUrl;
-
-                    // Set the value of the nft_number input field to the metadata ID
-                    const nftNumberInput = document.getElementById("nft_number");
-                    nftNumberInput.value = nftData.metadata.id;
-
-                    // Fetch dynamic data URL
-                    const dynamicDataURL = nftData.metadata.stats;
-
-                    // Fetch dynamic data
-                    fetch(dynamicDataURL)
+                // Clear egldCostContainer on new search
+                egldCostContainer.innerHTML = '';
+                xoxnoButtonContainer.innerHTML = '';
+                fetch(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${identifier}`)
                     .then(response => response.json())
-                    .then(dynamicData => {
-                        const mainTable = document.getElementById("nft_details_table");
-                        const talentsTable = document.getElementById("talents_table");
-
-                        // Clear previous table content
-                        mainTable.innerHTML = "<tr><th>Attribute</th><th>Value</th></tr>";
-                        talentsTable.innerHTML = "<tr><th>Talent</th><th>Value</th></tr>";
-
-                        // Populate tables with dynamic data
-                        const children = dynamicData.gameData[0].dynamicData;
-                        for (const key in children) {
-                            const value = children[key];
-                            if (key === "talents") {
-                                value.forEach(talent => {
-                                    if (talent.value !== 0) {
-                                        const row = talentsTable.insertRow(-1);
-                                        const cell1 = row.insertCell(0);
-                                        const cell2 = row.insertCell(1);
-                                        cell1.textContent = talent.name;
-                                        cell2.textContent = talent.value;
-                                    }
-                                });
-                            } else {
-                                const row = mainTable.insertRow(-1);
-                                const cell1 = row.insertCell(0);
-                                const cell2 = row.insertCell(1);
-                                cell1.textContent = key;
-                                cell2.textContent = value;
-                            }
+                    .then(data => {
+                        if (data.length === 0) {
+                            alert("No data found for the given identifier.");
+                            return;
                         }
+
+                        const nftData = data[0];
+                        const thumbnailUrl = nftData.media[0].thumbnailUrl;
+
+                        const nftImage = document.getElementById("nft_image");
+                        nftImage.src = thumbnailUrl;
+
+                        const nftNumberInput = document.getElementById("nft_number");
+                        nftNumberInput.value = nftData.nonce;
+                        
+                        console.log(`https://metadata.cantinaroyale.io/metadata/${pageName}/${nftData.nonce}`);
+                        fetch(`https://metadata.cantinaroyale.io/metadata/${pageName}/${nftData.nonce}`)
+                            .then(response => response.json())
+                            .then(ddata => {
+                                console.log(ddata);
+                                const nft_metaData = ddata;
+                                console.log(nft_metaData);
+
+                                const attributes = nft_metaData.attributes;
+                                console.log(attributes);
+
+                                const rarityAttribute = attributes.find(attr => attr.trait_type === "Rarity Class");
+
+                                if (rarityAttribute) {
+                                    const nftRarityInput = document.getElementById("nft_rarity");
+                                    nftRarityInput.value = rarityAttribute.value;
+                                } else {
+                                    alert("Rarity Class attribute not found.");
+                                }
+
+                        fetch(`https://metadata.cantinaroyale.io/dynamic/${pageName}/${nftData.nonce}`)
+                            .then(response => response.json())
+                            .then(dynamicData => {
+                                let currentLevel = dynamicData.level || 0;
+                                let characterTokens = dynamicData.character_tokens || 0;
+                                const children = dynamicData.gameData[0].dynamicData;
+                                for (const key in children) {
+                                    const value = children[key];
+                                    if (key === "talents") {
+                                        value.forEach(talent => {
+                                            if (talent.value !== 0) {
+                                                const talentRow = talentsTable.insertRow(-1);
+                                                talentRow.insertCell(0).textContent = talent.name;
+                                                talentRow.insertCell(1).textContent = talent.value;
+                                            }
+                                        });
+                                    } else {
+                                        const row = mainTable.insertRow(-1);
+                                        row.insertCell(0).textContent = key;
+                                        row.insertCell(1).textContent = value;
+
+                                        if (key === "level") {
+                                            currentLevel = value;
+                                        } else if (key === "character_tokens") {
+                                            characterTokens = value;
+                                        }
+                                    }
+                                }
+                                console.log(`Current Level: ${currentLevel}`);
+                                const levelCosts = costsPerLevel[currentLevel - 1];
+                                if (levelCosts) {
+                                    const maxCostCRT = costsPerLevel[19].crt;
+                                    let totalCRTCost = levelCosts.crt + (levelCosts.xp * 14000 / 3500) + (levelCosts.shards * (22500 * 9800 / 45000) / 500000);
+
+                                    if (totalCRTCost > maxCostCRT) {
+                                        totalCRTCost = maxCostCRT;
+                                    }
+
+                                    const level20Cost = maxCostCRT - totalCRTCost;
+
+                                    const row = costsTable.insertRow(-1);
+                                    row.insertCell(0).textContent = levelCosts.xp;
+                                    row.insertCell(1).textContent = levelCosts.shards;
+                                    row.insertCell(2).textContent = levelCosts.crt;
+                                    row.insertCell(3).textContent = level20Cost.toFixed(2);
+                                    row.insertCell(4).textContent = totalCRTCost.toFixed(2);
+
+                                    // Remove previous egldCostButton if exists
+                                    egldButtonContainer.innerHTML = '';
+
+                                    const egldCostButton = document.createElement("button");
+                                    egldCostButton.id = "egldCostButton";
+                                    egldCostButton.textContent = "Calculate EGLD Costs";
+                                    egldCostButton.classList.add("styled-button");
+                                    egldCostButton.addEventListener("click", function() {
+                                        fetch("https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqf57y8m9krsvrceqxujngzm77p82zqc502jpsnnezqs/tokens?identifiers=CRT-52decf,WEGLD-bd4d79")
+                                            .then(response => response.json())
+                                            .then(tokenData => {
+                                                let crtBalance, wegldBalance;
+
+                                                for (const token of tokenData) {
+                                                    if (token.identifier === "CRT-52decf") {
+                                                        crtBalance = BigInt(token.balance);
+                                                    } else if (token.identifier === "WEGLD-bd4d79") {
+                                                        wegldBalance = BigInt(token.balance);
+                                                    }
+                                                }
+
+                                                const currentEgldCost = totalCRTCost * (Number(wegldBalance) / Number(crtBalance));
+                                                const level20EgldCost = level20Cost * (Number(wegldBalance) / Number(crtBalance));
+
+                                                let egldCostTable = document.getElementById("egldCostTable");
+                                                if (!egldCostTable) {
+                                                    egldCostTable = document.createElement("table");
+                                                    egldCostTable.id = "egldCostTable";
+                                                    egldCostTable.innerHTML = `
+                                                        <tr>
+                                                            <th>Current EGLD Cost</th>
+                                                            <th>Level 20 EGLD Cost</th>
+                                                        </tr>
+                                                    `;
+                                                    egldCostContainer.appendChild(egldCostTable);
+                                                }
+
+                                                // Clear the table body before adding new rows
+                                                egldCostTable.innerHTML = `
+                                                    <tr>
+                                                        <th>Current EGLD Cost</th>
+                                                        <th>Level 20 EGLD Cost</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>${currentEgldCost.toFixed(2)}</td>
+                                                        <td>${level20EgldCost.toFixed(2)}</td>
+                                                    </tr>
+                                                `;
+                                            })
+                                            .catch(error => console.error("Error fetching token data:", error));
+                                    });
+                                    egldButtonContainer.appendChild(egldCostButton);
+
+                                    const xoxnoButton = document.createElement("button");
+                                xoxnoButton.id = "xoxnoButton";
+                                xoxnoButton.textContent = "XOXNO FP by rarity";
+                                xoxnoButton.classList.add("styled-button");
+                                xoxnoButton.addEventListener("click", function() {
+                                    const rarity = document.getElementById("nft_rarity").value;
+                                    if (!rarity) {
+                                        alert("Rarity class not available.");
+                                        return;
+                                    }
+
+                                    const pageName = path.split("/").pop().replace(".html", "");
+                                    const filters = {
+                                        filters: {
+                                            marketplace: ["XO"],
+                                            onSale: true,
+                                            auctionTypes: ["Nft", "SftOnePerPayment"],
+                                            tokens: ["EGLD"],
+                                            attributes: [],
+                                            range: {
+                                                min: 0,
+                                                max: 9007199254740991,
+                                                type: "saleInfoNft/min_bid_short"
+                                            }
+                                        },
+                                        name: "",
+                                        orderBy: ["saleInfoNft/min_bid_short asc"],
+                                        collection: pageName,
+                                        top: 1,
+                                        select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
+                                        skip: 0
+                                    };
+
+                                    const encodedFilters = btoa(JSON.stringify(filters));
+                                    const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
+
+                                    fetch(apiUrl)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const results = data.results;
+                                            if (results.length === 0) {
+                                                alert("No NFTs found for the given rarity.");
+                                                return;
+                                            }
+
+                                            const nft = results[0];
+                                            const identifier = 'https://xoxno.com/nft/' + nft.identifier;
+                                            const minBidShort = nft.saleInfoNft.min_bid_short;
+
+                                            let xoxnoTable = document.getElementById("xoxno_table");
+                                            if (!xoxnoTable) {
+                                                xoxnoTable = document.createElement("table");
+                                                xoxnoTable.id = "xoxno_table";
+                                                xoxnoTable.innerHTML = `
+                                                    <tr>
+                                                        <th>NFT Identifier</th>
+                                                        <th>Price (EGLD)</th>
+                                                    </tr>
+                                                `;
+                                                xoxnoTableContainer.appendChild(xoxnoTable);
+                                            }
+
+                                            // Clear the table body before adding new rows
+                                            xoxnoTable.innerHTML = `
+                                                <tr>
+                                                    <th>NFT Identifier</th>
+                                                    <th>Price (EGLD)</th>
+                                                </tr>
+                                                <tr>
+                                                    <td><a href="${identifier}" target="_blank">${nft.identifier}</a></td>
+                                                    <td>${minBidShort}</td>
+                                                </tr>
+                                            `;
+                                        })
+                                        .catch(error => console.error("Error fetching XOXNO data:", error));
+                                });
+                                xoxnoButtonContainer.appendChild(xoxnoButton);
+
+
+                                }
+                            });
+                            })
+                            .catch(error => console.error("Error fetching dynamic data:", error));
                     })
-                    .catch(error => console.error("Error fetching dynamic data:", error));
-                })
-                .catch(error => console.error("Error fetching NFT data:", error));
+                    .catch(error => console.error("Error fetching NFT data:", error));
             });
+
         });
     </script>
+    <div id="footer-placeholder"></div>
+    <script src="scripts/footer.js"></script>
 </body>
 </html>
