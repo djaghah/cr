@@ -8,7 +8,13 @@
     <style>
         /* Add this style to right-align the table columns */
         #nft_details_table td:nth-child(2),
-        #costs_table td,
+        #talents_table td:nth-child(2),
+        #costs_table td {
+            text-align: right;
+        }
+        #costs_table_20 td {
+            text-align: right;
+        }
         #egldCostTable td {
             text-align: right;
         }
@@ -78,15 +84,22 @@
                 </table>
                 <table id="costs_table">
                     <tr>
-                        <th colspan="6">Total accumulated to current level</th>
+                        <th colspan="3">Total accumulated to current level</th>
                     </tr>
                     <tr>
                         <th>XP</th>
                         <th>Shards</th>
                         <th>CRT</th>
-                        <th>Equivalent CRT</th>
-                        <th>Remaining -> Level 20</th>
-                        <th>Remaining Equivalent -> Level 20</th>
+                    </tr>
+                </table>
+                <table id="costs_table_20">
+                    <tr>
+                        <th colspan="3">Remaining necessary for level 20</th>
+                    </tr>
+                    <tr>
+                        <th>XP</th>
+                        <th>Shards</th>
+                        <th>CRT</th>
                     </tr>
                 </table>
                 <table id="talents_table">
@@ -139,15 +152,22 @@
                 const costsTable = document.getElementById("costs_table");
                 costsTable.innerHTML = `
                     <tr>
-                        <th colspan="6">Total accumulated to current level</th>
+                        <th colspan="3">Total accumulated to current level</th>
                     </tr>
                     <tr>
                         <th>XP</th>
                         <th>Shards</th>
                         <th>CRT</th>
-                        <th>Equivalent CRT</th>
-                        <th>Remaining -> Level 20</th>
-                        <th>Remaining Equivalent -> Level 20</th>
+                    </tr>`;
+                const costsTable20 = document.getElementById("costs_table_20");
+                costsTable20.innerHTML = `
+                    <tr>
+                        <th colspan="3">Remaining necessary for level 20</th>
+                    </tr>
+                    <tr>
+                        <th>XP</th>
+                        <th>Shards</th>
+                        <th>CRT</th>
                     </tr>`;
                 // Clear egldCostContainer on new search
                 egldCostContainer.innerHTML = '';
@@ -229,9 +249,12 @@
                                     row.insertCell(0).textContent = levelCosts.xp;
                                     row.insertCell(1).textContent = levelCosts.shards;
                                     row.insertCell(2).textContent = levelCosts.crt;
-                                    row.insertCell(3).textContent =  totalCRTCostEquivalent.toFixed(2);
-                                    row.insertCell(4).textContent = level20Cost.toFixed(2);
-                                    row.insertCell(5).textContent = level20CostEquivalent.toFixed(2);
+                                    //<!--row.insertCell(3).textContent =  totalCRTCostEquivalent.toFixed(2);-->
+                                    const row20 = costsTable20.insertRow(-1);
+                                    row20.insertCell(0).textContent = (costsPerLevel[19].xp - costsPerLevel[currentLevel - 1].xp).toFixed(2);
+                                    row20.insertCell(1).textContent = (costsPerLevel[19].shards - costsPerLevel[currentLevel - 1].shards).toFixed(2);
+                                    row20.insertCell(2).textContent = (costsPerLevel[19].crt - costsPerLevel[currentLevel - 1].crt).toFixed(2);
+                                    //<!--row.insertCell(5).textContent = level20CostEquivalent.toFixed(2);-->
                                     // Remove previous egldCostButton if exists
                                     egldButtonContainer.innerHTML = '';
 
@@ -257,7 +280,8 @@
                                                 const level20EgldCost = level20Cost * (Number(wegldBalance) / Number(crtBalance));
                                                 const currentEgldCostEquivalent = totalCRTCostEquivalent * (Number(wegldBalance) / Number(crtBalance));
                                                 const level20EgldCostEquivalent = level20CostEquivalent * (Number(wegldBalance) / Number(crtBalance));
-
+                                                console.log('currentEgldCostEquivalent: '+ currentEgldCostEquivalent);
+                                                console.log('level20EgldCostEquivalent: '+ level20EgldCostEquivalent);
                                                 let egldCostTable = document.getElementById("egldCostTable");
                                                 if (!egldCostTable) {
                                                     egldCostTable = document.createElement("table");
@@ -266,8 +290,8 @@
                                                         <tr>
                                                             <th>Current EGLD Cost</th>
                                                             <th>Level 20 EGLD Cost</th>
-                                                            <th>Equivalent</th>
-                                                            <th>Level 20 Equivalent</th>
+                                                            <!--  <th>Equivalent</th>-->
+                                                                <!--   <th>Level 20 Equivalent</th>-->
                                                         </tr>
                                                     `;
                                                     egldCostContainer.appendChild(egldCostTable);
@@ -278,14 +302,14 @@
                                                     <tr>
                                                         <th>Current EGLD Cost</th>
                                                         <th>Level 20 EGLD Cost</th>
-                                                        <th>Equivalent</th>
-                                                        <th>Level 20 Equivalent</th>
+                                                        <!-- <th>Equivalent</th>-->
+                                                            <!-- <th>Level 20 Equivalent</th>-->
                                                     </tr>
                                                     <tr>
                                                         <td>${currentEgldCost.toFixed(2)}</td>
                                                         <td>${level20EgldCost.toFixed(2)}</td>
-                                                        <td>${currentEgldCostEquivalent.toFixed(2)}</td>
-                                                        <td>${level20EgldCostEquivalent.toFixed(2)}</td>
+                                                        <!--    <td>${currentEgldCostEquivalent.toFixed(2)}</td>-->
+                                                            <!--    <td>${level20EgldCostEquivalent.toFixed(2)}</td>-->
                                                     </tr>
                                                 `;
                                             })
