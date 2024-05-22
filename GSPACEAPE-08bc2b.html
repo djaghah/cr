@@ -46,7 +46,7 @@
 </head>
 <body>
     <header>
-        <h1 id="header-text">Cantina Genesis Space Apes</h1>
+        <h1 id="header-text">Cantina Genesis EAPES</h1>
     </header>
     <main>
         
@@ -62,14 +62,10 @@
                     <img id="nft_image" src="" alt="NFT Image">
                 </div>
                 <div id="egld_cost_container"></div>
-                <div id="xoxno_button_container"></div> <!-- Container for xoxnoButton -->
-                <div id="xoxno_table_container"></div> <!-- Container for the XOXNO table -->
             </div>
             <div class="right">
                 <label for="nft_number">NFT #:</label>
                 <input type="text" id="nft_number" readonly style="text-align: right;">
-                <label for="nft_rarity">Rarity:</label>
-                <input type="text" id="nft_rarity" readonly>
                 <table id="nft_details_table">
                     <tr>
                         <th>Attribute</th>
@@ -118,8 +114,6 @@
             const searchButton = document.getElementById("searchButton");
             const egldButtonContainer = document.getElementById("egld_button_container");
             const egldCostContainer = document.getElementById("egld_cost_container");
-            const xoxnoButtonContainer = document.getElementById("xoxno_button_container");
-            const xoxnoTableContainer = document.getElementById("xoxno_table_container");
 
             searchButton.addEventListener("click", function() {
                 const identifier = pageName + '-' + document.getElementById("identifier").value;
@@ -149,7 +143,7 @@
                     </tr>`;
                 // Clear egldCostContainer on new search
                 egldCostContainer.innerHTML = '';
-                xoxnoButtonContainer.innerHTML = '';
+
                 fetch(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${identifier}`)
                     .then(response => response.json())
                     .then(data => {
@@ -166,15 +160,7 @@
 
                         const nftNumberInput = document.getElementById("nft_number");
                         nftNumberInput.value = nftData.metadata.id;
-                        const attributes = nftData.metadata.attributes;
-                        const rarityAttribute = attributes.find(attr => attr.trait_type === "Rarity Class");
 
-                        if (rarityAttribute) {
-                            const nftRarityInput = document.getElementById("nft_rarity");
-                            nftRarityInput.value = rarityAttribute.value;
-                        } else {
-                            alert("Rarity Class attribute not found.");
-                        }
                         const dynamicDataURL = nftData.metadata.stats;
 
                         fetch(dynamicDataURL)
@@ -275,89 +261,6 @@
                                             .catch(error => console.error("Error fetching token data:", error));
                                     });
                                     egldButtonContainer.appendChild(egldCostButton);
-
-                                    const xoxnoButton = document.createElement("button");
-                                xoxnoButton.id = "xoxnoButton";
-                                xoxnoButton.textContent = "XOXNO FP by rarity";
-                                xoxnoButton.classList.add("styled-button");
-                                xoxnoButton.addEventListener("click", function() {
-                                    const rarity = document.getElementById("nft_rarity").value;
-                                    if (!rarity) {
-                                        alert("Rarity class not available.");
-                                        return;
-                                    }
-
-                                    const pageName = path.split("/").pop().replace(".html", "");
-                                    const filters = {
-                                        filters: {
-                                            marketplace: ["XO"],
-                                            onSale: true,
-                                            auctionTypes: ["Nft", "SftOnePerPayment"],
-                                            tokens: ["EGLD"],
-                                            attributes: [{
-                                                trait_type: "Rarity Class",
-                                                value: rarity
-                                            }],
-                                            range: {
-                                                min: 0,
-                                                max: 9007199254740991,
-                                                type: "saleInfoNft/min_bid_short"
-                                            }
-                                        },
-                                        name: "",
-                                        orderBy: ["saleInfoNft/min_bid_short asc"],
-                                        collection: pageName,
-                                        top: 1,
-                                        select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
-                                        skip: 0
-                                    };
-
-                                    const encodedFilters = btoa(JSON.stringify(filters));
-                                    const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
-
-                                    fetch(apiUrl)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            const results = data.results;
-                                            if (results.length === 0) {
-                                                alert("No NFTs found for the given rarity.");
-                                                return;
-                                            }
-
-                                            const nft = results[0];
-                                            const identifier = 'https://xoxno.com/nft/' + nft.identifier;
-                                            const minBidShort = nft.saleInfoNft.min_bid_short;
-
-                                            let xoxnoTable = document.getElementById("xoxno_table");
-                                            if (!xoxnoTable) {
-                                                xoxnoTable = document.createElement("table");
-                                                xoxnoTable.id = "xoxno_table";
-                                                xoxnoTable.innerHTML = `
-                                                    <tr>
-                                                        <th>NFT Identifier</th>
-                                                        <th>Price (EGLD)</th>
-                                                    </tr>
-                                                `;
-                                                xoxnoTableContainer.appendChild(xoxnoTable);
-                                            }
-
-                                            // Clear the table body before adding new rows
-                                            xoxnoTable.innerHTML = `
-                                                <tr>
-                                                    <th>NFT Identifier</th>
-                                                    <th>Price (EGLD)</th>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="${identifier}" target="_blank">${nft.identifier}</a></td>
-                                                    <td>${minBidShort}</td>
-                                                </tr>
-                                            `;
-                                        })
-                                        .catch(error => console.error("Error fetching XOXNO data:", error));
-                                });
-                                xoxnoButtonContainer.appendChild(xoxnoButton);
-
-
                                 }
                             })
                             .catch(error => console.error("Error fetching dynamic data:", error));
