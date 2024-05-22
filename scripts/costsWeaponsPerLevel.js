@@ -1,0 +1,22 @@
+const costsWeaponsPerLevel = [
+    { level: 1, shards: 0, crt: 0, xp: 0 },
+    { level: 2, shards: 2500, crt: 5, xp: 50 },
+    { level: 3, shards: 7500, crt: 17, xp: 250 },
+    { level: 4, shards: 15500, crt: 42, xp: 600 },
+    { level: 5, shards: 28500, crt: 107, xp: 1200 },
+    { level: 6, shards: 47500, crt: 217, xp: 2200 },
+    { level: 7, shards: 71500, crt: 392, xp: 4200 },
+    { level: 8, shards: 105500, crt: 662, xp: 7200 },
+    { level: 9, shards: 155500, crt: 1012, xp: 11200 },
+    { level: 10, shards: 215500, crt: 1462, xp: 16200 },
+    { level: 11, shards: 283500, crt: 2032, xp: 22200 },
+    { level: 12, shards: 359500, crt: 2682, xp: 29200 },
+    { level: 13, shards: 441500, crt: 3377, xp: 37200 },
+    { level: 14, shards: 527500, crt: 4117, xp: 46200 },
+    { level: 15, shards: 617500, crt: 4897, xp: 56200 },
+    { level: 16, shards: 709500, crt: 5712, xp: 67200 },
+    { level: 17, shards: 803500, crt: 6562, xp: 79200 },
+    { level: 18, shards: 899500, crt: 7442, xp: 92200 },
+    { level: 19, shards: 997500, crt: 8342, xp: 106200 },
+    { level: 20, shards: 1097500, crt: 9262, xp: 121200 }
+];
