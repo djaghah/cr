@@ -12,6 +12,9 @@
         #costs_table td {
             text-align: right;
         }
+        #earnings_table td {
+            text-align: right;
+        }
         #costs_table_20 td {
             text-align: right;
         }
@@ -108,11 +111,21 @@
                         <th>Value</th>
                     </tr>
                 </table>
-                
+                <table id="earnings_table">
+                    <tr>
+                        <th>Place</th>
+                        <th>Novice</th>
+                        <th>Fighter</th>
+                        <th>Warrior</th>
+                        <th>Expert</th>
+                        <th>Veteran</th>
+                    </tr>
+                </table>
             </div>
         </div>
     </main>
     <script src="scripts/costsPerLevel.js"></script>
+    <script src="scripts/leaguePercentages.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Extract the current HTML file name without the extension
@@ -169,6 +182,16 @@
                         <th>Shards</th>
                         <th>CRT</th>
                     </tr>`;
+                    const earningsTable = document.getElementById("earnings_table");
+                earningsTable.innerHTML = `
+                    <tr>
+                        <th>Place</th>
+                        <th>Novice</th>
+                        <th>Fighter</th>
+                        <th>Warrior</th>
+                        <th>Expert</th>
+                        <th>Veteran</th>
+                    </tr>`;  
                 // Clear egldCostContainer on new search
                 egldCostContainer.innerHTML = '';
                 xoxnoButtonContainer.innerHTML = '';
@@ -203,6 +226,7 @@
                             .then(response => response.json())
                             .then(dynamicData => {
                                 let currentLevel = dynamicData.level || 0;
+                                let earn_rate = dynamicData.earn_rate || 0;
                                 let characterTokens = dynamicData.character_tokens || 0;
                                 const children = dynamicData.gameData[0].dynamicData;
                                 for (const key in children) {
@@ -222,11 +246,27 @@
 
                                         if (key === "level") {
                                             currentLevel = value;
-                                        } else if (key === "character_tokens") {
+                                        } 
+                                        else if (key === "earn_rate") {
+                                            earn_rate = value;
+                                        }else if (key === "character_tokens") {
                                             characterTokens = value;
                                         }
                                     }
                                 }
+
+                                const earningsTable = document.getElementById("earnings_table");
+                                const places = ["1", "2", "3", "4", "5"];
+
+                                for (let i = 0; i < places.length; i++) {
+                                    const earningsRow = earningsTable.insertRow(-1);
+                                    earningsRow.insertCell(0).textContent = places[i];
+                                    earningMatrix[i].forEach((multiplier, index) => {
+                                        const calculatedValue = multiplier * crt_prize * earn_rate;
+                                        earningsRow.insertCell(index + 1).textContent = calculatedValue.toFixed(2); // Assuming you want to round to two decimal places
+                                    });
+                                }
+
                                 console.log(`Current Level: ${currentLevel}`);
                                 const levelCosts = costsPerLevel[currentLevel - 1];
                                 if (levelCosts) {
