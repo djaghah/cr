@@ -10,6 +10,12 @@
         #nft_details_table td:nth-child(2),
         #talents_table td:nth-child(2),
         #xoxno_table td:nth-child(3),
+        #xoxno_table td:nth-child(4),
+        #xoxno_table td:nth-child(5),
+        #xoxno_table td:nth-child(7) {
+            text-align: right;
+        }
+        
         #costs_table td {
             text-align: right;
         }
@@ -394,7 +400,9 @@ fetch(apiUrl)
                     <th>Name</th>
                     <th>Price (EGLD)</th>
                     <th>Star Level</th>
+                    <th>Level</th>
                     <th>Action</th>
+                    <th>Value (Price - Level)</th>
                 </tr>
             `;
             xoxnoTableContainer.appendChild(xoxnoTable);
@@ -407,13 +415,15 @@ fetch(apiUrl)
                 <th>Name</th>
                 <th>Price (EGLD)</th>
                 <th>Star Level</th>
+                <th>Level</th>
                 <th>Action</th>
+                <th>Value (Price - Level)</th>
             </tr>
         `;
 
         results.forEach(nft => {
             const identifier = `https://xoxno.com/nft/${nft.identifier}`;
-            const minBidShort = nft.saleInfoNft.min_bid_short;
+            const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
             const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
 
             const row = xoxnoTable.insertRow(-1);
@@ -428,10 +438,14 @@ fetch(apiUrl)
 
             const starLevelCell = row.insertCell(3);
             starLevelCell.textContent = ""; // Initially blank
+            const levelCell = row.insertCell(4);
+            levelCell.textContent = ""; 
+            const actionCell = row.insertCell(5);
+            const valueCell = row.insertCell(6);
+            valueCell.textContent = ""; // Initially blank
 
-            const actionCell = row.insertCell(4);
             const actionButton = document.createElement("button");
-            actionButton.textContent = "Fetch Star Level";
+            actionButton.textContent = "Fetch Levels";
             actionButton.addEventListener("click", function() {
                 fetch(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${nft.identifier}`)
                     .then(response => response.json())
@@ -443,15 +457,44 @@ fetch(apiUrl)
                             .then(dynamicData => {
                                 const starLevel = dynamicData.starLevel || 0;
                                 starLevelCell.textContent = starLevel;
+                                const level = dynamicData.level || 0;
+                                levelCell.textContent = level;
+
+                                // Fetch CRT price in EGLD
+                                fetch("https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqf57y8m9krsvrceqxujngzm77p82zqc502jpsnnezqs/tokens?identifiers=CRT-52decf,WEGLD-bd4d79")
+                                    .then(response => response.json())
+                                    .then(tokenData => {
+                                        let crtBalance, wegldBalance;
+
+                                        for (const token of tokenData) {
+                                            if (token.identifier === "CRT-52decf") {
+                                                crtBalance = BigInt(token.balance);
+                                            } else if (token.identifier === "WEGLD-bd4d79") {
+                                                wegldBalance = BigInt(token.balance);
+                                            }
+                                        }
+
+                                        const crtPriceInEgld = Number(wegldBalance) / Number(crtBalance);
+                                        const crtCost = costsWeaponsPerLevel[level - 1].crt;
+                                        const value = minBidShort - (crtCost * crtPriceInEgld);
+                                        valueCell.textContent = value.toFixed(2);
+                                    })
+                                    .catch(error => {
+                                        console.error("Error fetching token data:", error);
+                                        valueCell.textContent = "Error";
+                                    });
+
                             })
                             .catch(error => {
-                                console.error("Error fetching Star Level:", error);
+                                console.error("Error fetching dynamic data:", error);
                                 starLevelCell.textContent = "Error";
+                                levelCell.textContent = "Error";
                             });
                     })
                     .catch(error => {
                         console.error("Error fetching NFT data:", error);
                         starLevelCell.textContent = "Error";
+                        levelCell.textContent = "Error";
                     });
             });
             actionCell.appendChild(actionButton);
