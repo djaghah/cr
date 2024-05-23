@@ -52,7 +52,7 @@
 </head>
 <body>
     <header>
-        <h1 id="header-text">Cantina Genesis EApes</h1>
+        <h1 id="header-text">Cantina Genesis Elrond Apes</h1>
     </header>
     <main>
         
@@ -319,7 +319,7 @@
 
                                     const xoxnoButton = document.createElement("button");
                                 xoxnoButton.id = "xoxnoButton";
-                                xoxnoButton.textContent = "XOXNO FP by rarity";
+                                xoxnoButton.textContent = "XOXNO top 50 listings by rarity";
                                 xoxnoButton.classList.add("styled-button");
                                 xoxnoButton.addEventListener("click", function() {
                                     const rarity = document.getElementById("nft_rarity").value;
@@ -327,7 +327,6 @@
                                         alert("Rarity class not available.");
                                         return;
                                     }
-
                                     const pageName = path.split("/").pop().replace(".html", "");
                                     const filters = {
                                         filters: {
@@ -348,54 +347,128 @@
                                         name: "",
                                         orderBy: ["saleInfoNft/min_bid_short asc"],
                                         collection: pageName,
-                                        top: 1,
+                                        top: 50,
                                         select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
                                         skip: 0
                                     };
 
                                     const encodedFilters = btoa(JSON.stringify(filters));
                                     const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
+fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+        const results = data.results;
+        if (results.length === 0) {
+            alert("No NFTs found for the given rarity.");
+            return;
+        }
 
-                                    fetch(apiUrl)
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            const results = data.results;
-                                            if (results.length === 0) {
-                                                alert("No NFTs found for the given rarity.");
-                                                return;
+        let xoxnoTable = document.getElementById("xoxno_table");
+        if (!xoxnoTable) {
+            xoxnoTable = document.createElement("table");
+            xoxnoTable.id = "xoxno_table";
+            xoxnoTable.innerHTML = `
+                <tr>
+                    <th>NFT Identifier</th>
+                    <th>Name</th>
+                    <th>Price (EGLD)</th>
+                    <th>Level</th>
+                    <th>Action</th>
+                    <th>Value (Price - Level)</th>
+                </tr>
+            `;
+            xoxnoTableContainer.appendChild(xoxnoTable);
+        }
+
+        // Clear the table body before adding new rows
+        xoxnoTable.innerHTML = `
+            <tr>
+                <th>NFT Identifier</th>
+                <th>Name</th>
+                <th>Price (EGLD)</th>
+                <th>Level</th>
+                <th>Action</th>
+                <th>Value (Price - Level)</th>
+            </tr>
+        `;
+
+        results.forEach(nft => {
+            const identifier = `https://xoxno.com/nft/${nft.identifier}`;
+            const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
+            const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
+
+            const row = xoxnoTable.insertRow(-1);
+            const identifierCell = row.insertCell(0);
+            identifierCell.innerHTML = `<a href="${identifier}" target="_blank">${nft.identifier}</a>`;
+
+            const nameCell = row.insertCell(1);
+            nameCell.textContent = name;
+
+            const priceCell = row.insertCell(2);
+            priceCell.textContent = minBidShort;
+
+            const levelCell = row.insertCell(3);
+            levelCell.textContent = ""; 
+            const actionCell = row.insertCell(4);
+            const valueCell = row.insertCell(5);
+            valueCell.textContent = ""; // Initially blank
+
+            const actionButton = document.createElement("button");
+            actionButton.textContent = "Fetch Levels";
+            actionButton.addEventListener("click", function() {
+                fetch(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${nft.identifier}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        const nftData = data[0];
+                        console.log(nftData);
+                        fetch(nftData.metadata.stats)
+                            .then(response => response.json())
+                            .then(ddd => {
+                               const level = ddd.gameData[0].dynamicData.level || 0;
+                                levelCell.textContent = level;
+
+                                // Fetch CRT price in EGLD
+                                fetch("https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqf57y8m9krsvrceqxujngzm77p82zqc502jpsnnezqs/tokens?identifiers=CRT-52decf,WEGLD-bd4d79")
+                                    .then(response => response.json())
+                                    .then(tokenData => {
+                                        let crtBalance, wegldBalance;
+
+                                        for (const token of tokenData) {
+                                            if (token.identifier === "CRT-52decf") {
+                                                crtBalance = BigInt(token.balance);
+                                            } else if (token.identifier === "WEGLD-bd4d79") {
+                                                wegldBalance = BigInt(token.balance);
                                             }
+                                        }
 
-                                            const nft = results[0];
-                                            const identifier = 'https://xoxno.com/nft/' + nft.identifier;
-                                            const minBidShort = nft.saleInfoNft.min_bid_short;
+                                        const crtPriceInEgld = Number(wegldBalance) / Number(crtBalance);
+                                        const crtCost = costsPerLevel[level - 1].crt;
+                                        const value = minBidShort - (crtCost * crtPriceInEgld);
+                                        valueCell.textContent = value.toFixed(2);
+                                    })
+                                    .catch(error => {
+                                        console.error("Error fetching token data:", error);
+                                        valueCell.textContent = "Error";
+                                    });
 
-                                            let xoxnoTable = document.getElementById("xoxno_table");
-                                            if (!xoxnoTable) {
-                                                xoxnoTable = document.createElement("table");
-                                                xoxnoTable.id = "xoxno_table";
-                                                xoxnoTable.innerHTML = `
-                                                    <tr>
-                                                        <th>NFT Identifier</th>
-                                                        <th>Price (EGLD)</th>
-                                                    </tr>
-                                                `;
-                                                xoxnoTableContainer.appendChild(xoxnoTable);
-                                            }
+                            })
+                            .catch(error => {
+                                console.error("Error fetching dynamic data:", error);
+                                levelCell.textContent = "Error";
+                            });
+                    })
+                    .catch(error => {
+                        console.error("Error fetching NFT data:", error);
+                        levelCell.textContent = "Error";
+                    });
+            });
+            actionCell.appendChild(actionButton);
+        });
+    })
+    .catch(error => console.error("Error fetching XOXNO data:", error));
 
-                                            // Clear the table body before adding new rows
-                                            xoxnoTable.innerHTML = `
-                                                <tr>
-                                                    <th>NFT Identifier</th>
-                                                    <th>Price (EGLD)</th>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="${identifier}" target="_blank">${nft.identifier}</a></td>
-                                                    <td>${minBidShort}</td>
-                                                </tr>
-                                            `;
-                                        })
-                                        .catch(error => console.error("Error fetching XOXNO data:", error));
-                                });
+                                });/////
                                 xoxnoButtonContainer.appendChild(xoxnoButton);
 
 
@@ -405,7 +478,6 @@
                     })
                     .catch(error => console.error("Error fetching NFT data:", error));
             });
-
         });
     </script>
     <div id="footer-placeholder"></div>
