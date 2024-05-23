@@ -375,6 +375,7 @@ fetch(apiUrl)
                     <th>Level</th>
                     <th>Action</th>
                     <th>Value (Price - Level)</th>
+                    <th>Rarity</th>
                 </tr>
             `;
             xoxnoTableContainer.appendChild(xoxnoTable);
@@ -389,10 +390,12 @@ fetch(apiUrl)
                 <th>Level</th>
                 <th>Action</th>
                 <th>Value (Price - Level)</th>
+                <th>Rarity</th>
             </tr>
         `;
 
         results.forEach(nft => {
+            console.log(results);
             const identifier = `https://xoxno.com/nft/${nft.identifier}`;
             const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
             const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
@@ -412,16 +415,27 @@ fetch(apiUrl)
             const actionCell = row.insertCell(4);
             const valueCell = row.insertCell(5);
             valueCell.textContent = ""; // Initially blank
+            const rarityCell = row.insertCell(6);
+            rarityCell.textContent = ""; // Initially blank
 
             const actionButton = document.createElement("button");
             actionButton.textContent = "Fetch Levels";
             actionButton.addEventListener("click", function() {
+                console.log(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${nft.identifier}`)
                 fetch(`https://api.elrond.com/collections/${pageName}/nfts?identifiers=${nft.identifier}`)
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
                         const nftData = data[0];
-                        console.log(nftData);
+                        if (nftData.url.includes('gold')) {
+                           rarityCell.textContent = 'gold';
+                        }else  if (nftData.url.includes('epic')) {
+                           rarityCell.textContent = 'epic';
+                        }else  if (nftData.url.includes('legendary')) {
+                           rarityCell.textContent = 'legendary';
+                        }else {
+                           rarityCell.textContent = '';
+                        }
+                        if(nftData.url)
                         fetch(`https://metadata.cantinaroyale.io/dynamic/${pageName}/${nftData.nonce}`)
                             .then(response => response.json())
                             .then(ddd => {
@@ -468,7 +482,7 @@ fetch(apiUrl)
     })
     .catch(error => console.error("Error fetching XOXNO data:", error));
 
-                                });
+                                });/////
                                 xoxnoButtonContainer.appendChild(xoxnoButton);
 
 
