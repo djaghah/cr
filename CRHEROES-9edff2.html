@@ -244,15 +244,18 @@
                                     } else {
                                         const row = mainTable.insertRow(-1);
                                         row.insertCell(0).textContent = key;
-                                        row.insertCell(1).textContent = value;
+                                       
 
                                         if (key === "level") {
                                             currentLevel = value;
+                                             row.insertCell(1).textContent = value;
                                         } 
                                         else if (key === "earn_rate") {
                                             earn_rate = value + 1;
+                                             row.insertCell(1).textContent = earn_rate;
                                         }else if (key === "character_tokens") {
                                             characterTokens = value;
+                                             row.insertCell(1).textContent = value;
                                         }
                                     }
                                 }
