@@ -357,38 +357,17 @@
                                     }
 
                                     const pageName = path.split("/").pop().replace(".html", "");
-                                    const filters = {
-                                        filters: {
-                                            marketplace: ["XO"],
-                                            onSale: true,
-                                            auctionTypes: ["Nft", "SftOnePerPayment"],
-                                            tokens: ["EGLD"],
-                                            attributes: [],
-                                            range: {
-                                                min: 0,
-                                                max: 9007199254740991,
-                                                type: "saleInfoNft/min_bid_short"
-                                            }
-                                        },
-                                        name: "",
-                                        orderBy: ["saleInfoNft/min_bid_short asc"],
-                                        collection: pageName,
-                                        top: 50,
-                                        select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
-                                        skip: 0
-                                    };
-
-                                    const encodedFilters = btoa(JSON.stringify(filters));
-                                    const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
+                                    const apiUrl = `https://api.flipix.io/listing/collection/CRMYTH-546419?take=50&skip=0&sort=price:asc`;
 console.log(apiUrl);
 fetch(apiUrl)
     .then(response => response.json())
     .then(data => {
-        const results = data.results;
-        if (results.length === 0) {
-            alert("No NFTs found for the given rarity.");
-            return;
-        }
+        console.log('DATA: '+ data);
+        const results = data;
+        // if (results.length === 0) {
+        //     alert("No NFTs found for the given rarity.");
+        //     return;
+        // }
 
         let xoxnoTable = document.getElementById("xoxno_table");
         if (!xoxnoTable) {
@@ -423,7 +402,11 @@ fetch(apiUrl)
 
         results.forEach(nft => {
             const identifier = `https://xoxno.com/nft/${nft.identifier}`;
-            const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
+           
+            const priceInEther = parseFloat(nft.price) / 1e18;
+        
+        // Format the price to 2 decimal places
+            const minBidShort = priceInEther.toFixed(2);
             const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
 
             const row = xoxnoTable.insertRow(-1);
@@ -456,7 +439,7 @@ fetch(apiUrl)
                             .then(response => response.json())
                             .then(dynamicData => {
                                 const starLevel = dynamicData.starLevel || 0;
-                                 starLevelCell.innerHTML = ""; // Clear any existing content
+                                starLevelCell.innerHTML = ""; // Clear any existing content
                     for (let i = 0; i < starLevel; i++) {
                         const starImg = document.createElement("img");
                         starImg.src = "images/star.png";
