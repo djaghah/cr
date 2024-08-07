@@ -368,36 +368,11 @@
                                         return;
                                     }
                                     const pageName = path.split("/").pop().replace(".html", "");
-                                    const filters = {
-                                        filters: {
-                                            marketplace: ["XO"],
-                                            onSale: true,
-                                            auctionTypes: ["Nft", "SftOnePerPayment"],
-                                            tokens: ["EGLD"],
-                                            attributes: [{
-                                                trait_type: "Rarity Class",
-                                                value: rarity
-                                            }],
-                                            range: {
-                                                min: 0,
-                                                max: 9007199254740991,
-                                                type: "saleInfoNft/min_bid_short"
-                                            }
-                                        },
-                                        name: "",
-                                        orderBy: ["saleInfoNft/min_bid_short asc"],
-                                        collection: pageName,
-                                        top: 50,
-                                        select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
-                                        skip: 0
-                                    };
-
-                                    const encodedFilters = btoa(JSON.stringify(filters));
-                                    const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
+                                     const apiUrl = `https://api.flipix.io/listing/collection/${pageName}?take=50&skip=0&sort=price:asc`;
 fetch(apiUrl)
     .then(response => response.json())
     .then(data => {
-        const results = data.results;
+        const results = data;
         if (results.length === 0) {
             alert("No NFTs found for the given rarity.");
             return;
