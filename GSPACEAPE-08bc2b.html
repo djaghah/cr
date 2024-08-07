@@ -368,7 +368,7 @@
                                         return;
                                     }
                                     const pageName = path.split("/").pop().replace(".html", "");
-                                    const apiUrl = `https://api.flipix.io/listing/collection/${pageName}?take=50&skip=0&sort=price:asc`;
+                                    const apiUrl = `https://api.flipix.io/listing/collection/${pageName}?take=50&skip=0&sort=price:asc&traits=Rarity%20Class:`+rarity;
 fetch(apiUrl)
     .then(response => response.json())
     .then(data => {
