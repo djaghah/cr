@@ -409,7 +409,8 @@ fetch(apiUrl)
 
         results.forEach(nft => {
             const identifier = `https://xoxno.com/nft/${nft.identifier}`;
-            const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
+             const priceInEther = parseFloat(nft.price) / 1e18;
+            const minBidShort = priceInEther.toFixed(2);
             const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
 
             const row = xoxnoTable.insertRow(-1);
