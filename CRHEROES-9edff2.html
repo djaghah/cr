@@ -244,21 +244,20 @@
                                     } else {
                                         const row = mainTable.insertRow(-1);
                                         row.insertCell(0).textContent = key;
-                                       
 
                                         if (key === "level") {
                                             currentLevel = value;
-                                             row.insertCell(1).textContent = value;
+                                            row.insertCell(1).textContent = value;
                                         } 
                                         else if (key === "earn_rate") {
-                                            earn_rate = value + 1;
-                                             row.insertCell(1).textContent = earn_rate;
+                                            earn_rate = value+1;
+                                            row.insertCell(1).textContent = earn_rate;
                                         }else if (key === "character_tokens") {
                                             characterTokens = value;
-                                             row.insertCell(1).textContent = value;
+                                            row.insertCell(1).textContent = value;
                                         }
                                         else{
-                                             row.insertCell(1).textContent = value;
+                                            row.insertCell(1).textContent = value;
                                         }
                                     }
                                 }
@@ -376,29 +375,8 @@
                                         return;
                                     }
                                     const pageName = path.split("/").pop().replace(".html", "");
-                                    const filters = {
-                                        filters: {
-                                            marketplace: ["XO"],
-                                            onSale: true,
-                                            auctionTypes: ["Nft", "SftOnePerPayment"],
-                                            tokens: ["EGLD"],
-                                            attributes: [],
-                                            range: {
-                                                min: 0,
-                                                max: 9007199254740991,
-                                                type: "saleInfoNft/min_bid_short"
-                                            }
-                                        },
-                                        name: "",
-                                        orderBy: ["saleInfoNft/min_bid_short asc"],
-                                        collection: pageName,
-                                        top: 50,
-                                        select: ["metadata/attributes", "name", "onSale", "saleInfoNft", "hasSecondNFT", "royalties", "identifier", "collection", "type"],
-                                        skip: 0
-                                    };
-
-                                    const encodedFilters = btoa(JSON.stringify(filters));
-                                    const apiUrl = `https://proxy-api.xoxno.com/searchNFTs/${encodedFilters}`;
+                                  
+                                    const apiUrl = `https://api.flipix.io/listing/collection/${pageName}?take=50&skip=0&sort=price:asc`;
 fetch(apiUrl)
     .then(response => response.json())
     .then(data => {
@@ -442,7 +420,8 @@ fetch(apiUrl)
         results.forEach(nft => {
             console.log(results);
             const identifier = `https://xoxno.com/nft/${nft.identifier}`;
-            const minBidShort = parseFloat(nft.saleInfoNft.min_bid_short);
+            const priceInEther = parseFloat(nft.price) / 1e18;
+            const minBidShort = priceInEther.toFixed(2);
             const name = nft.name || "Unknown"; // default to "Unknown" if the name is not available
 
             const row = xoxnoTable.insertRow(-1);
